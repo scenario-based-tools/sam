@@ -1,0 +1,35 @@
+package org.st.sam.log;
+
+import java.util.Arrays;
+
+public class SLogTreeNode {
+  
+  public static int globalIDgen = 0;
+  
+  public final SLogTreeNode pre;
+  public SLogTreeNode post[];
+  
+  public final short id;
+  public final int globalID;
+  
+  /**
+   * Field set for the last letter of a word to remember the number of
+   * occurrences of that word in the tree.
+   */
+  public int occurrences = -1;
+
+  public SLogTreeNode(short id, SLogTreeNode pre) {
+    this.id = id;
+    this.pre = pre;
+    this.post = new SLogTreeNode[0];
+    this.globalID = globalIDgen++;
+  }
+  
+  public void append(SLogTreeNode other) {
+    for (int i=0; i<post.length; i++) {
+      if (post[i] == other) return;
+    }
+    post = Arrays.copyOf(post, post.length+1);
+    post[post.length-1] = other;
+  }
+}

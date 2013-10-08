@@ -1,0 +1,13 @@
+SAM/mine v.0.3.0
+----------------
+
++ reimplemented linear miner
++ support for repeatable, structured experiments for miners
+* fixed bugs in heuristics to reduce search space during mining
+
+SAM/mine v.0.2.0
+----------------
+
++ basic mining algorithm to discover branching time scenarios from
+  logs in XES format
++ some optimizations to reduce the search space during mining 

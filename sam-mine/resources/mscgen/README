@@ -1,0 +1,8 @@
+sam-mine uses mscgen to render result scenarios. To produce the binary release
+of sam-mine, you have to
+
+- download the binary release of mscgen from:
+  http://code.google.com/p/mscgen/ OR
+  http://www.mcternan.me.uk/mscgen/
+  
+- place the binary files in this directory (<sam-mine>/resources/mscgen)

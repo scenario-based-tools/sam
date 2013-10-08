@@ -1,0 +1,21 @@
+<project default="pre-build">
+	
+	<!-- the pre-build hook, add here all dependencies and steps to be
+	     carried out before executing the project build task -->
+	
+	<target name="pre-build">
+	</target>
+	
+	<target name="pre-svn-clean">
+	</target>
+	
+	<fileset dir="${home}" id="distfiles.includes">
+		<include name="README"/>
+		<include name="sam_mine.properties"/>
+	</fileset>
+	
+	<fileset dir="${home}" id="distbinfiles.includes">
+		<include name="sam_mine.properties"/>
+	</fileset>
+	
+</project>
