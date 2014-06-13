@@ -812,6 +812,21 @@ public class RunExperimentCompare {
     return nonSubsumed;
   }
   
+  	/**
+	 * generate visual representation of each discovered scenario, render it to
+	 * a PNG file, and embed the result in the HTML document
+	 * 
+	 * @param r
+	 * @param lscs
+	 * @param miner_for_subsumption
+	 * @param originalScenarios
+	 * @param resultsDir
+	 * @param treeFigHeight
+	 * @param render_trees
+	 * @param type
+	 * @param ref_prefix
+	 * @throws IOException
+	 */
   protected void appendResults(
       StringBuilder r,
       ArrayList<LSC> lscs,
@@ -886,10 +901,30 @@ public class RunExperimentCompare {
           if (mb && isSubsumed(originalScenarios.get(l), minerBranch, originalScenarios_branch))
             r.append("subsumed by branching scenario<br/>\n");
           
+          // compute support of the scenario
           r.append("support: "+l.getSupport()+"<br/>\n");
           if (mb) r.append("confidence (branch) "+minerBranch.getTree().confidence(originalScenarios.get(l), true)+"<br/>\n");
           if (ml) r.append("confidence (linear) "+minerLinear.getTree().confidence(originalScenarios.get(l), true)+"<br/>\n");
           
+          // get all occurrences of current scenario from the tree of the branching miner
+          MineBranchingTree tree = minerBranch.getTree();
+          SimpleArrayList<SLogTreeNode[]> occurrences = tree.getOccurrences(originalScenarios.get(l));
+          StringBuilder occ_sb = new StringBuilder();
+          if (occurrences != null) {
+        	  // generate a text file, for each occurrence of scenario l
+        	  // write the sequence of node ids of this occurrence as one line to the text file
+        	  for (SLogTreeNode[] occ : occurrences) {
+        		  for (SLogTreeNode occ_n : occ) {
+        			  occ_sb.append(occ_n.globalID+" ");
+        		  }
+        		  occ_sb.append('\n');
+        	  }
+          }
+
+          // write all occurrences to disk
+          String occ_txtfile =  "tree_occurrences_lsc_"+(lsc_num+1)+"_"+ref_prefix+".txt"; 
+          SAMOutput.writeToFile(occ_sb.toString(), resultsDir+SLASH+occ_txtfile);
+                    
 
       //r.append("</div><br/>\n");
       r.append("</td>\n");
@@ -1089,10 +1124,10 @@ public class RunExperimentCompare {
     
     //exp.setParameters("./experiments/jeti_invariants/", "jeti_invariants.xes.gz", 1.0 /*fract*/, 10 /*supp*/, 1.0 /* conf */);
     
-    //exp.setParameters("./experiments_fse2012/", "columba.xes.gz", 1.0 /*fract*/, 100 /*supp*/, 1.0 /* conf */);
-    //exp.setParameters("./experiments_fse2012/", "columba_filtered.xes.gz", 1.0 /*fract*/, 10 /*supp*/, 0.5 /* conf B */, .5 /* conf L */);
-    //exp.setParameters("./experiments_fse2012/", "crossftp_filtered.xes.gz", 1.0 /*fract*/, 10 /*supp*/, .4 /* conf B */, 1.0 /* conf L */);
-    //exp.setParameters("./experiments_fse2012/", "crossftp.xes.gz", 1.0 /*fract*/, 10 /*supp*/, 2.0 /* conf B */, 1.0 /* conf L */);
+    //exp.setParameters("./experiments_ase2013/", "columba.xes.gz", 1.0 /*fract*/, 100 /*supp*/, 1.0 /* conf */);
+    //exp.setParameters("./experiments_ase2013/", "columba_filtered.xes.gz", 1.0 /*fract*/, 10 /*supp*/, 0.5 /* conf B */, .5 /* conf L */);
+    //exp.setParameters("./experiments_ase2013/", "crossftp.xes.gz", 1.0 /*fract*/, 14 /*supp*/, 1.0 /* conf B */, 1.0 /* conf L */);
+    //exp.setParameters("./experiments_ase2013/", "crossftp.xes.gz", 1.0 /*fract*/, 10 /*supp*/, 2.0 /* conf B */, 1.0 /* conf L */);
 
     //exp.setParameters("./experiments/crossftp_invariants/", "crossftp_invariants.xes.gz", 1.0 /*fract*/, 80 /*supp*/, 1.0 /* conf B */, 1.0 /* conf L */);
 

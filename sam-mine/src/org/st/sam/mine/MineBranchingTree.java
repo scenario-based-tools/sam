@@ -1,5 +1,6 @@
 package org.st.sam.mine;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -151,8 +152,21 @@ public class MineBranchingTree extends org.st.sam.log.SLogTree {
     return s.support;
   }
   
+  	/**
+	 * Maps each scenario to a list of occurrences of this scenario in the tree.
+	 * Each occurrence is a sequence of tree nodes matching the scenario.
+	 */
   private Map<SScenario, SimpleArrayList<SLogTreeNode[]> > scenarioCoverage = new HashMap<SScenario, SimpleArrayList<SLogTreeNode[]>>();
   
+  /**
+   * Compute confidence of a scenario in the tree. Use parameter {@code markTree} to populate
+   * a table storing each occurrence of the scenario in the tree. Use {@link #toDot_ScenarioCoverage(Map)}
+   * or  
+   * 
+   * @param s
+   * @param markTree
+   * @return
+   */
   public double confidence(SScenario s, boolean markTree) {
     int preMatch = 0;
     int mainMatch_pos = 0;
@@ -473,5 +487,13 @@ public class MineBranchingTree extends org.st.sam.log.SLogTree {
     sb.append("}\n");
     
     return sb.toString();
+  }
+  
+  /**
+   * @param s
+   * @return all occurrences of scenario {@code s} in the tree requires to call {@link #confidence(SScenario, boolean)} prior to compute the occurrences 
+   */
+  public SimpleArrayList<SLogTreeNode[]> getOccurrences(SScenario s) {
+	  return scenarioCoverage.get(s);
   }
 }
