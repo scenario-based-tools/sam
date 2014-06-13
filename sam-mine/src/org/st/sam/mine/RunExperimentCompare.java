@@ -1066,7 +1066,7 @@ public class RunExperimentCompare {
   public static void main(String[] args) throws IOException {
     
     RunExperimentCompare exp = new RunExperimentCompare();
-    //if (!exp.readCommandLine(args)) return;
+    if (!exp.readCommandLine(args)) return;
     
     //exp.experimentFileRoot = "./experiments/columba_ext/";
     //exp.inputFile = "columba_ext_resampled2_filtered.xes.gz";
@@ -1092,7 +1092,7 @@ public class RunExperimentCompare {
     //exp.setParameters("./experiments_fse2012/", "columba.xes.gz", 1.0 /*fract*/, 100 /*supp*/, 1.0 /* conf */);
     //exp.setParameters("./experiments_fse2012/", "columba_filtered.xes.gz", 1.0 /*fract*/, 10 /*supp*/, 0.5 /* conf B */, .5 /* conf L */);
     //exp.setParameters("./experiments_fse2012/", "crossftp_filtered.xes.gz", 1.0 /*fract*/, 10 /*supp*/, .4 /* conf B */, 1.0 /* conf L */);
-    exp.setParameters("./experiments_fse2012/", "crossftp.xes.gz", 1.0 /*fract*/, 10 /*supp*/, 2.0 /* conf B */, 1.0 /* conf L */);
+    //exp.setParameters("./experiments_fse2012/", "crossftp.xes.gz", 1.0 /*fract*/, 10 /*supp*/, 2.0 /* conf B */, 1.0 /* conf L */);
 
     //exp.setParameters("./experiments/crossftp_invariants/", "crossftp_invariants.xes.gz", 1.0 /*fract*/, 80 /*supp*/, 1.0 /* conf B */, 1.0 /* conf L */);
 

@@ -78,11 +78,11 @@ public class RunExperimentBranching extends RunExperimentCompare {
   public static void main(String[] args) throws IOException {
     
     RunExperimentBranching exp = new RunExperimentBranching();
-    //if (!exp.readCommandLine(args)) return;
+    if (!exp.readCommandLine(args)) return;
     
   
     //exp.setParameters("./experiments/crossftp_invariants/", "crossftp_invariants.xes.gz", 1.0 /*fract*/, 120 /*supp*/, 1.0 /* conf B */, 1.0 /* conf L */);
-    exp.setParameters("./experiments_fse2012/", "columba_filtered.xes.gz", 1.0 /*fract*/, 20 /*supp*/, 1.0 /* conf B */, 1.0 /* conf L */);
+    //exp.setParameters("./experiments_fse2012/", "columba_filtered.xes.gz", 1.0 /*fract*/, 20 /*supp*/, 1.0 /* conf B */, 1.0 /* conf L */);
     
     
     exp.experiment();
