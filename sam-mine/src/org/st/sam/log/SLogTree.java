@@ -15,6 +15,8 @@ public class SLogTree {
   public List<SLogTreeNode> roots = new LinkedList<SLogTreeNode>();
   public Map<SLogTreeNode, Integer> nodeCount = new HashMap<SLogTreeNode, Integer>();
   
+  public Map<SLogTreeNode, SimpleArrayList<Integer>> nodeInTrace = new HashMap<SLogTreeNode, SimpleArrayList<Integer>>();
+  
   private final boolean mergeTraces;
   
   private Set<SLogTreeNode> leafs = new HashSet<SLogTreeNode>();
@@ -110,6 +112,10 @@ public class SLogTree {
   }
   
   public SLogTreeNode addTrace(short[] trace) {
+	  return addTrace(trace, -1);
+  }
+  
+  public SLogTreeNode addTrace(short[] trace, int trace_index) {
     SLogTreeNode current = null;
     for (int e=0; e<trace.length; e++) {
       
@@ -161,6 +167,12 @@ public class SLogTree {
       }
       // the current node has been visited once more
       nodeCount.put(current, nodeCount.get(current)+1);
+      
+      // remember the index of the trace going over this node
+      if (trace_index != -1) {
+    	  if (!nodeInTrace.containsKey(current)) nodeInTrace.put(current, new SimpleArrayList<Integer>());
+    	  nodeInTrace.get(current).add(trace_index);
+      }
     }
     leafs.add(current);
     return current;
@@ -168,7 +180,7 @@ public class SLogTree {
   
   private void buildTree(SLog log) {
     for (int t=0; t<log.traces.length; t++) {
-      addTrace(log.traces[t]);
+      addTrace(log.traces[t], t);
     }
   }
   

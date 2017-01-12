@@ -192,7 +192,7 @@ public class RunExperimentCompare {
     minerBranch = new MineLSC(config_branch);
     minerBranch.OPTIONS_WEIGHTED_OCCURRENCE = true;
     System.out.println("mining branching lscs from "+logFile);
-    minerBranch.mineLSCs(xlog, minSupportThreshold, confidence, logFile);
+    minerBranch.mineLSCs(xlog, minSupportThreshold, confidence);
     runTime_minerBranch = System.currentTimeMillis()-runTime_minerBranch;
     
     originalScenarios_branch = new HashMap<LSC, SScenario>();
@@ -214,7 +214,7 @@ public class RunExperimentCompare {
     //  return;
     //LSCMiner minerLinear = new LSCMiner();
     //minerLinear.mineLSCs(dataSet, support, confidence, density);
-    minerLinear.mineLSCs(xlog, minSupportThreshold, confidence, logFile);
+    minerLinear.mineLSCs(xlog, minSupportThreshold, confidence);
     
     originalScenarios_linear = new HashMap<LSC, SScenario>();
     // comment out the following loop to consider only linear mining results
@@ -1127,7 +1127,7 @@ public class RunExperimentCompare {
     //exp.setParameters("./experiments_ase2013/", "columba.xes.gz", 1.0 /*fract*/, 100 /*supp*/, 1.0 /* conf */);
     //exp.setParameters("./experiments_ase2013/", "columba_filtered.xes.gz", 1.0 /*fract*/, 10 /*supp*/, 0.5 /* conf B */, .5 /* conf L */);
     //exp.setParameters("./experiments_ase2013/", "crossftp.xes.gz", 1.0 /*fract*/, 14 /*supp*/, 1.0 /* conf B */, 1.0 /* conf L */);
-    //exp.setParameters("./experiments_ase2013/", "crossftp.xes.gz", 1.0 /*fract*/, 10 /*supp*/, 2.0 /* conf B */, 1.0 /* conf L */);
+    //exp.setParameters("./experiments_ase2013/", "crossftp.xes.gz", 1.0 /*fract*/, 10 /*supp*/, 1.0 /* conf B */, 1.0 /* conf L */);
 
     //exp.setParameters("./experiments/crossftp_invariants/", "crossftp_invariants.xes.gz", 1.0 /*fract*/, 80 /*supp*/, 1.0 /* conf B */, 1.0 /* conf L */);
 

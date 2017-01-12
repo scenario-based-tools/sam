@@ -118,7 +118,7 @@ public class RunExperimentEffect extends RunExperimentCompare {
     MineLSC miner = new MineLSC(c_br);
     miner.OPTIONS_WEIGHTED_OCCURRENCE = true;
     System.out.println("discovering words from inverted tree of "+logFile);
-    miner.mineLSCs(invertedLog, inverseTree, minSupportThreshold, confidence_branch, null);
+    miner.mineLSCs(invertedLog, inverseTree, minSupportThreshold, confidence_branch);
     
     supportedWords = new SimpleArrayList<SLogTree.SupportedWord>();
     for (SupportedWord w : miner.getSupportedWords()) {

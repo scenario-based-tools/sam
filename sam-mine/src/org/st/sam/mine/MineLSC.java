@@ -103,7 +103,7 @@ public class MineLSC {
   }
   
   public void mineLSCs(String logFile, int minSupportThreshold, double confidence) throws IOException {
-    mineLSCs(XESImport.readXLog(logFile), minSupportThreshold, confidence, logFile);
+    mineLSCs(XESImport.readXLog(logFile), minSupportThreshold, confidence);
   }
   
   public void mineLSCs_writeResults(String logFile) throws IOException {
@@ -138,17 +138,17 @@ public class MineLSC {
     
   }
   
-  public void mineLSCs(final XLog xlog, int minSupportThreshold, double confidence, String targetFilePrefix) throws IOException {
+  public void mineLSCs(final XLog xlog, int minSupportThreshold, double confidence) throws IOException {
     System.out.println("log contains "+xlog.size()+" traces");
     
     SLog slog = new SLog(xlog);
     boolean mergeTraces = (config.mode == Configuration.MODE_BRANCHING) ? true : false;
     tree = new MineBranchingTree(slog, mergeTraces);
     
-    mineLSCs(slog, tree, minSupportThreshold, confidence, targetFilePrefix);
+    mineLSCs(slog, tree, minSupportThreshold, confidence);
   }
     
-  public void mineLSCs(final SLog slog, final MineBranchingTree tree, int minSupportThreshold, double confidence, String targetFilePrefix) throws IOException {
+  public void mineLSCs(final SLog slog, final MineBranchingTree tree, int minSupportThreshold, double confidence) throws IOException {
     
     setSLog(slog);
     
@@ -462,7 +462,7 @@ public class MineLSC {
     assert s1.support > 0;
     assert s2.support > 0;
     
-    if (s1.support >= s2.support && s1.implies(s2)
+    if (/*s1.support >= s2.support && */s1.implies(s2)
         )
       return true;
     else
@@ -475,7 +475,7 @@ public class MineLSC {
     assert s1.support > 0;
     assert s2.support > 0;
     
-    if (s1.support >= s2.support && s1.subsumes(s2))
+    if (/*s1.support >= s2.support && */s1.subsumes(s2))
       return true;
     else
       return false;
