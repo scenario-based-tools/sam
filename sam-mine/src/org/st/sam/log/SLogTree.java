@@ -257,6 +257,13 @@ public class SLogTree {
     return maxWidth;
   }
   
+  /**
+   * @return log from which the tree was generated
+   */
+  public SLog getSlog() {
+	return slog;
+  }
+  
   public TreeStatistics getStatistics() {
     
     TreeStatistics s = new TreeStatistics();

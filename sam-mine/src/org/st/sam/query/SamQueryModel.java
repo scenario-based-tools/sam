@@ -49,18 +49,20 @@ import com.google.gwt.dev.util.collect.HashSet;
 
 
 
-public class QueryModel {
+public class SamQueryModel {
 	
 	public static void main(String s[]) throws IOException {
 		
-    	String logFile = s[0];
+    	//String logFile = s[0];
+    	//String logFile = "D:/LinuxShared/Logs/CelonisChallenge/EventLog_1-to-1_MultiID/DemoEventlogMultiCaseID.csv_mi_complete.xes";
+		String logFile = "D:/LinuxShared/Logs/Roadfines/Road_Traffic_Fine_Management_Process.xes.gz";
     	XLog xlog = XESImport.readXLog(logFile);
     	SLog slog = new SLog(xlog);
 
     	System.setProperty("org.graphstream.ui.renderer", "org.graphstream.ui.j2dviewer.J2DGraphRenderer");
     	
         LogExplore expl = new LogExplore(slog);
-        QueryModel model = new QueryModel(xlog, expl); 
+        SamQueryModel model = new SamQueryModel(xlog, expl); 
 	}
 	
 	protected final LogExplore expl;
@@ -68,12 +70,12 @@ public class QueryModel {
 	
 	private MineLSC minerBranch;
 	
-	public QueryModel (XLog _xlog, LogExplore _expl) {
+	public SamQueryModel (XLog _xlog, LogExplore _expl) {
 		
 		this.expl = _expl;
 		this.xlog = _xlog;
 	
-		final QueryModel q = this;
+		final SamQueryModel q = this;
 		
 		JFrame frame = new JFrame("Query Panel");
 		// Add a window listner for close button

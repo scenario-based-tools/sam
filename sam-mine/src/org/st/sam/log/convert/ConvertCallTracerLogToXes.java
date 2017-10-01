@@ -1,4 +1,4 @@
-package org.st.sam.log;
+package org.st.sam.log.convert;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -15,13 +15,31 @@ import org.deckfour.xes.model.XTrace;
 import org.deckfour.xes.out.XSerializer;
 import org.deckfour.xes.out.XesXmlGZIPSerializer;
 import org.deckfour.xes.out.XesXmlSerializer;
+import org.st.sam.log.SEvent;
+import org.st.sam.log.XESExport;
 
-public class ConvertLog {
+/**
+ * Convert plain-text format logs produced by the CallTracer tool into an XES event log. 
+ * 
+ * Input format of the plain-text log: Each line corresponds to one event of the form
+ * caller.class.name&objectID|callee.class.name&28705408|calleeMethodName(Arg1, Arg2, ...)|defaultResult
+ * 
+ * These fields are stored in an {@link SEvent} accordingly.
+ * 
+ * Output format:
+ * 
+ * For each .txt file in the input directory, create a new trace in the output XES file.
+ * Each event carries the attributes as specified in {@link SEvent#toXEvent(XFactory)}.
+ * 
+ * @author dfahland
+ *
+ */
+public class ConvertCallTracerLogToXes {
   
   private final XFactory xlogFactory;
   private final XLog log;
   
-  public ConvertLog() {
+  public ConvertCallTracerLogToXes() {
     xlogFactory = XFactoryRegistry.instance().currentDefault();
     log = xlogFactory.createLog();
   }
@@ -109,11 +127,11 @@ public class ConvertLog {
     
     if (args.length != 2) {
       System.out.println("error, wrong number of arguments");
-      System.out.println("usage: java "+ConvertLog.class.getCanonicalName()+" <tracedir> <output.xes>");
+      System.out.println("usage: java "+ConvertCallTracerLogToXes.class.getCanonicalName()+" <tracedir> <output.xes>");
       return;
     }
     
-    ConvertLog rl = new ConvertLog();
+    ConvertCallTracerLogToXes rl = new ConvertCallTracerLogToXes();
     rl.read(args[0]);
     System.out.println("Writing "+args[1]);
     XESExport.writeLog(rl.getLog(), args[1]);

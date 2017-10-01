@@ -1,4 +1,4 @@
-package org.st.sam.log;
+package org.st.sam.log.transform;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -10,6 +10,9 @@ import java.util.Map;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
+import org.st.sam.log.SLog;
+import org.st.sam.log.XESExport;
+import org.st.sam.log.XESImport;
 import org.st.sam.mine.datastructure.LSCEvent;
 import org.st.sam.util.SAMOutput;
 

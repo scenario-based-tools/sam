@@ -1,31 +1,34 @@
-package org.st.sam.log;
+package org.st.sam.log.transform;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.factory.XFactory;
 import org.deckfour.xes.factory.XFactoryRegistry;
-import org.deckfour.xes.model.XAttribute;
-import org.deckfour.xes.model.XAttributeLiteral;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
+import org.st.sam.log.SLog;
+import org.st.sam.log.XESExport;
+import org.st.sam.log.XESImport;
 
-public class AggregateLog {
+public class ResampleLog2 {
   
-  public AggregateLog(String logFile) throws IOException {
+  public ResampleLog2(String logFile, int newTraceOn) throws IOException {
     xlogFactory = XFactoryRegistry.instance().currentDefault();
     
-    loadLog(logFile);
+    loadLog(logFile, newTraceOn);
   }
 
-  private void loadLog(String logFile) throws IOException {
+  private void loadLog(String logFile, int newTraceOn) throws IOException {
     loadXLog(logFile);
     XLog xlog = getXLog();
     setSLog(new SLog(xlog));
+    this.newTraceOn = newTraceOn;
   }
+  
+  private int newTraceOn;
   
   private final XFactory xlogFactory;
   
@@ -92,50 +95,24 @@ public class AggregateLog {
     
     for (XTrace trace : xlog) {
       
-      XTrace currentTrace = xlogFactory.createTrace();
-      newLog.add(currentTrace);
-
-      
-      int sameEventCount = 1;
+      XTrace currentTrace = null;
       XEvent lastEvent = null;
       
       for (XEvent e : trace) {
         short id = slog.event2id.get(e);
-        short lastEventId = (lastEvent != null) ? slog.event2id.get(lastEvent) : -1;
+        short lastID = (lastEvent != null) ? slog.event2id.get(lastEvent) : -1;
         
-        if (id != lastEventId) {
-          if (lastEvent != null) {
-            if (sameEventCount == 1) {
-              currentTrace.add(lastEvent);
-            } else {
-              
-              XEvent eAggregate = xlogFactory.createEvent(lastEvent.getAttributes());
-              XAttributeLiteral name = (XAttributeLiteral)eAggregate.getAttributes().get(SEvent.FIELD_METHOD);
-              XAttribute name_repeat = xlogFactory.createAttributeLiteral(SEvent.FIELD_METHOD, name.getValue()+"+", XConceptExtension.instance()); 
-              eAggregate.getAttributes().put(SEvent.FIELD_METHOD, name_repeat);
-              
-              currentTrace.add(eAggregate);
-              
-              sameEventCount = 1;
-            }
-          }
-        } else {
-          sameEventCount++;
+        if (id != lastID && lastID == newTraceOn) {
+          currentTrace = xlogFactory.createTrace();
+          currentTrace.add(lastEvent);
+          newLog.add(currentTrace);
         }
+        
+        if (currentTrace != null && id != newTraceOn) {
+          currentTrace.add(e);
+        }
+        
         lastEvent = e;
-      }
-
-      // take care of last event in the trace
-      if (sameEventCount == 1) {
-        currentTrace.add(lastEvent);
-      } else {
-        
-        XEvent eAggregate = xlogFactory.createEvent(lastEvent.getAttributes());
-        XAttributeLiteral name = (XAttributeLiteral)eAggregate.getAttributes().get(SEvent.FIELD_METHOD);
-        XAttribute name_repeat = xlogFactory.createAttributeLiteral(SEvent.FIELD_METHOD, name.getValue()+"+", XConceptExtension.instance()); 
-        eAggregate.getAttributes().put(SEvent.FIELD_METHOD, name_repeat);
-        
-        currentTrace.add(eAggregate);
       }
     }
     
@@ -146,16 +123,16 @@ public class AggregateLog {
     
     if (args.length != 2) {
       System.out.println("error. wrong number of arguments. required:");
-      System.out.println("   <logfile.xes.gz> <result.xes.gz>");
+      System.out.println("   <logfile.xes> <event.id-trigger-new-trace>");
       return;
     }
     
-    AggregateLog filter = new AggregateLog(args[0]);
+    ResampleLog2 filter = new ResampleLog2(args[0], Integer.parseInt(args[1]));
     System.out.print(filter.logSummary());
     
     XLog resampled = filter.resample();
     
-    String outputFileName = XESImport.getLogFileName(args[1])+XESImport.getLogFileExtension(args[1]);
+    String outputFileName = XESImport.getLogFileName(args[0])+"_resampled"+XESImport.getLogFileExtension(args[0]);
     XESExport.writeLog(resampled, outputFileName);
   }
 }

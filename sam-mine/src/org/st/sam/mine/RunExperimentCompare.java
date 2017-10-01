@@ -27,8 +27,8 @@ import java.util.TreeSet;
 
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
-import org.st.sam.log.Log_ChoiceConsistency;
 import org.st.sam.log.SLogTree.TreeStatistics;
+import org.st.sam.log.analyze.Log_ChoiceConsistency;
 import org.st.sam.log.SLogTreeNode;
 import org.st.sam.log.SScenario;
 import org.st.sam.log.XESImport;

@@ -1,33 +1,27 @@
-package org.st.sam.log;
+package org.st.sam.log.transform;
 
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.deckfour.xes.factory.XFactory;
-import org.deckfour.xes.factory.XFactoryRegistry;
 import org.deckfour.xes.model.XEvent;
 import org.deckfour.xes.model.XLog;
 import org.deckfour.xes.model.XTrace;
+import org.st.sam.log.SLog;
+import org.st.sam.log.XESExport;
+import org.st.sam.log.XESImport;
 
-public class ResampleLog2 {
+public class FilterLog {
   
-  public ResampleLog2(String logFile, int newTraceOn) throws IOException {
-    xlogFactory = XFactoryRegistry.instance().currentDefault();
-    
-    loadLog(logFile, newTraceOn);
+  public FilterLog(String logFile) throws IOException {
+    loadLog(logFile);
   }
 
-  private void loadLog(String logFile, int newTraceOn) throws IOException {
+  private void loadLog(String logFile) throws IOException {
     loadXLog(logFile);
     XLog xlog = getXLog();
     setSLog(new SLog(xlog));
-    this.newTraceOn = newTraceOn;
   }
-  
-  private int newTraceOn;
-  
-  private final XFactory xlogFactory;
   
   private XLog xlog;
   private SLog slog;
@@ -86,50 +80,46 @@ public class ResampleLog2 {
     return s.toString();
   }
   
-  public XLog resample() {
-    
-    XLog newLog = xlogFactory.createLog();
-    
-    for (XTrace trace : xlog) {
-      
-      XTrace currentTrace = null;
-      XEvent lastEvent = null;
-      
-      for (XEvent e : trace) {
-        short id = slog.event2id.get(e);
-        short lastID = (lastEvent != null) ? slog.event2id.get(lastEvent) : -1;
-        
-        if (id != lastID && lastID == newTraceOn) {
-          currentTrace = xlogFactory.createTrace();
-          currentTrace.add(lastEvent);
-          newLog.add(currentTrace);
-        }
-        
-        if (currentTrace != null && id != newTraceOn) {
-          currentTrace.add(e);
-        }
-        
-        lastEvent = e;
+  public boolean[] getFrequentEventFilter() {
+    boolean[] nonFrequent = new boolean[summary_id_count.length];
+  
+    for (int e=0; e<summary_id_count.length; e++) {
+      if (summary_id_count[e] <= summary_average_count) {
+        nonFrequent[e] = true;
+      } else {
+        nonFrequent[e] = false;
       }
     }
-    
-    return newLog;
+    return nonFrequent;
+  }
+  
+  public void filterEventClasses(boolean[] keepClass) {
+    for (XTrace trace : xlog) {
+      List<XEvent> toRemove = new LinkedList<XEvent>();
+      for (XEvent e : trace) {
+        short id = slog.event2id.get(e);
+        if (!keepClass[id]) toRemove.add(e);
+      }
+      for (XEvent e : toRemove) {
+        trace.remove(e);
+      }
+    }
   }
   
   public static void main(String[] args) throws IOException {
     
-    if (args.length != 2) {
+    if (args.length != 1) {
       System.out.println("error. wrong number of arguments. required:");
-      System.out.println("   <logfile.xes> <event.id-trigger-new-trace>");
+      System.out.println("   <logfile.xes>");
       return;
     }
     
-    ResampleLog2 filter = new ResampleLog2(args[0], Integer.parseInt(args[1]));
+    FilterLog filter = new FilterLog(args[0]);
     System.out.print(filter.logSummary());
+    boolean keepClass[] = filter.getFrequentEventFilter();
+    filter.filterEventClasses(keepClass);
     
-    XLog resampled = filter.resample();
-    
-    String outputFileName = XESImport.getLogFileName(args[0])+"_resampled"+XESImport.getLogFileExtension(args[0]);
-    XESExport.writeLog(resampled, outputFileName);
+    String outputFileName = XESImport.getLogFileName(args[0])+"_filtered"+XESImport.getLogFileExtension(args[0]);
+    XESExport.writeLog(filter.getXLog(), outputFileName);
   }
 }

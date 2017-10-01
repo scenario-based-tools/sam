@@ -1,10 +1,14 @@
-package org.st.sam.log;
+package org.st.sam.log.analyze;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
 import org.deckfour.xes.model.XLog;
+import org.st.sam.log.SLog;
+import org.st.sam.log.SLogTree;
+import org.st.sam.log.SLogTreeNode;
+import org.st.sam.log.XESImport;
 
 import com.google.gwt.dev.util.collect.HashSet;
 
@@ -15,7 +19,7 @@ public class Log_ChoiceConsistency {
   }
 
   public Log_ChoiceConsistency(SLogTree tree) throws IOException {
-    setSLog(tree.slog);
+    setSLog(tree.getSlog());
     setTree(tree);
   }
   
