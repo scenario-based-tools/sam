@@ -27,7 +27,7 @@ public class LSCStory {
 	}
 	
 	private String getStoryPre() {
-		return "whenever "+getChart(s.pre)+": "+getChart(s.main)+" happens";
+		return "whenever "+getChart(s.pre)+" happpened "+getChart(s.main)+" happens";
 	}
 	
 	private String getStoryMain() {

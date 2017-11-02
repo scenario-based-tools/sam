@@ -19,12 +19,12 @@ public class MineBranchingTree extends org.st.sam.log.SLogTree {
     super(log, mergeTraces);
   }
   
-  public void continuesWith(SLogTreeNode n, short word[], boolean[] visible, SimpleArrayList<SLogTreeNode[]> occurrences, SimpleArrayList<SLogTreeNode[]> partialOccurrences, boolean[] violators, boolean[] stuck_at) {
+  public void continuesWith(SLogTreeNode n, short word[], boolean[] visible, SimpleArrayList<SLogTreeNode[]> occurrences, SimpleArrayList<SLogTreeNode[]> partialOccurrences, boolean[] violators, boolean[] stuck_at, boolean directFollows) {
     SLogTreeNode[] occurrence = new SLogTreeNode[word.length]; 
-    continuesWith(n, word, 0, visible, occurrence, occurrences, partialOccurrences, violators, stuck_at);
+    continuesWith(n, word, 0, visible, occurrence, occurrences, partialOccurrences, violators, stuck_at, directFollows);
   }
   
-  public void continuesWith(SLogTreeNode n, short word[], int pos, boolean[] visible, SLogTreeNode[] occurrence, SimpleArrayList<SLogTreeNode[]> occurrences, SimpleArrayList<SLogTreeNode[]> partialOccurrences, boolean[] violators, boolean[] stuck_at) {
+  public void continuesWith(SLogTreeNode n, short word[], int pos, boolean[] visible, SLogTreeNode[] occurrence, SimpleArrayList<SLogTreeNode[]> occurrences, SimpleArrayList<SLogTreeNode[]> partialOccurrences, boolean[] violators, boolean[] stuck_at, boolean directFollows) {
     // no more letters to check: word found
     if (n.id == word[pos] && pos == word.length-1) {
       occurrence[pos] = n;
@@ -32,8 +32,8 @@ public class MineBranchingTree extends org.st.sam.log.SLogTree {
       return;
     }
 
-    // this node is labeled with the current letter or with an invisible letter
-    if (n.id == word[pos] || !visible[n.id]) {
+    // this node is labeled with the current letter, or with an invisible letter and non-direct follows matches are allowed
+    if (n.id == word[pos] || (!directFollows && !visible[n.id])) {
 
       // if the current node is labeled with the current event, move to the next event
       // otherwise search for the current event at the successors
@@ -41,9 +41,9 @@ public class MineBranchingTree extends org.st.sam.log.SLogTree {
       if (n.id == word[pos]) occurrence[pos] = n;
       // find the successors that continues the word
       for (SLogTreeNode n2 : n.post) {
-        continuesWith(n2, word, pos+nextLetter, visible, occurrence, occurrences, partialOccurrences, violators, stuck_at);
+        continuesWith(n2, word, pos+nextLetter, visible, occurrence, occurrences, partialOccurrences, violators, stuck_at, directFollows);
       }
-    } else if (visible[n.id]) {
+    } else if (!directFollows && visible[n.id]) {
       // a visible letter, occurring in wrong order -> no continuation
       if (violators != null) {
         if (pos > 0)
@@ -127,15 +127,15 @@ public class MineBranchingTree extends org.st.sam.log.SLogTree {
     }
   }
   
-  public int support(short[] word, boolean OPTIONS_WEIGHTED_OCCURRENCE) {
+  public int support(short[] word, boolean OPTIONS_WEIGHTED_OCCURRENCE, boolean directFollows) {
     
-    SimpleArrayList<SLogTreeNode[]> occ = countOccurrences(word, null, null);
+    SimpleArrayList<SLogTreeNode[]> occ = countOccurrences(word, null, null, directFollows);
     int total_occurrences = getTotalOccurrences(occ, OPTIONS_WEIGHTED_OCCURRENCE);
     
     return total_occurrences;
   }
   
-  public int support(SScenario s, boolean OPTIONS_WEIGHTED_OCCURRENCE) {
+  public int support(SScenario s, boolean OPTIONS_WEIGHTED_OCCURRENCE, boolean directFollows) {
     
     if (s.support == -1) {
     
@@ -146,7 +146,7 @@ public class MineBranchingTree extends org.st.sam.log.SLogTree {
       for (int e=0; e<s.main.length; e++) {
         word[e+s.pre.length] = s.main[e];
       }
-      s.support = support(word, OPTIONS_WEIGHTED_OCCURRENCE);
+      s.support = support(word, OPTIONS_WEIGHTED_OCCURRENCE, directFollows);
     }
     
     return s.support;
@@ -165,9 +165,10 @@ public class MineBranchingTree extends org.st.sam.log.SLogTree {
    * 
    * @param s
    * @param markTree
+   * @param directFollows set to 'false' if other events may occur between two events of the scenario
    * @return
    */
-  public double confidence(SScenario s, boolean markTree) {
+  public double confidence(SScenario s, boolean markTree, boolean directFollows) {
     int preMatch = 0;
     int mainMatch_pos = 0;
     int mainMatch_neg = 0;
@@ -212,7 +213,7 @@ public class MineBranchingTree extends org.st.sam.log.SLogTree {
             partialOccurrences.quickClear();
             
             // get continuations with main-chart
-            continuesWith(n2, s.main, 0, visible, occurrence, occurrences, partialOccurrences, null, null);
+            continuesWith(n2, s.main, 0, visible, occurrence, occurrences, partialOccurrences, null, null, directFollows);
             
             if (occurrences.size() > 0) {
               positive = true;
@@ -332,21 +333,21 @@ public class MineBranchingTree extends org.st.sam.log.SLogTree {
     return new double[] { (double)coveredNodes_all/totalNodes, (double)coveredNodes_main/totalNodes };
   }
   
-  public SimpleArrayList<SLogTreeNode[]> countOccurrences(short word[], boolean[] violators, boolean[] stuck_at) {
+  public SimpleArrayList<SLogTreeNode[]> countOccurrences(short word[], boolean[] violators, boolean[] stuck_at, boolean directFollows) {
     boolean[] visible = new boolean[slog.originalNames.length];
     for (int i=0; i<word.length; i++) visible[word[i]] = true;
     
-    return countOccurrences(word, visible, violators, stuck_at);
+    return countOccurrences(word, visible, violators, stuck_at, directFollows);
   }
   
-  public SimpleArrayList<SLogTreeNode[]> countOccurrences(short word[], boolean[] visible, boolean[] violators, boolean[] stuck_at) {
+  public SimpleArrayList<SLogTreeNode[]> countOccurrences(short word[], boolean[] visible, boolean[] violators, boolean[] stuck_at, boolean directFollows) {
     SimpleArrayList<SLogTreeNode[]> occurrences = new SimpleArrayList<SLogTreeNode[]>();
     
     for (SLogTreeNode n : nodes) {
       if (n.id == word[0]) {
         
         //System.out.println("  at "+n.globalID);
-        continuesWith(n, word, visible, occurrences, null, violators, stuck_at);
+        continuesWith(n, word, visible, occurrences, null, violators, stuck_at, directFollows);
         //System.out.println("  "+count);
       }
     }

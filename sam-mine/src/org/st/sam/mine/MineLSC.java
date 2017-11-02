@@ -41,6 +41,8 @@ public class MineLSC {
     public boolean optimizedSearch = true;
     public boolean skipEvents_invisible = true;
     public boolean allowEventRepetitions = false;
+    public int maxRepetitionCount = 1;			 // how often an event may repeat in a sequence			
+    public boolean forceDirectlyFollows = false; // whether two subsequent events in a scenario must not have other events between them in a trace
     public List<short[]> triggers = null;
     public List<short[]> effects = null;
     public boolean discoverScenarios = true;
@@ -303,7 +305,7 @@ public class MineLSC {
                 continue;
               }
               
-              double c = skip ? 0 : tree.confidence(s, false);
+              double c = skip ? 0 : tree.confidence(s, false, config.forceDirectlyFollows);
               
               if (showDebug(cand, null)) {
                 System.out.println("check "+toString(pre)+" "+toString(main_cand)+" has confidence "+c);
@@ -320,7 +322,7 @@ public class MineLSC {
                 
                 //if (_cand.support == -1)
                 {
-                  SimpleArrayList<SLogTreeNode[]> occ = tree.countOccurrences(cand, null, null);
+                  SimpleArrayList<SLogTreeNode[]> occ = tree.countOccurrences(cand, null, null, config.forceDirectlyFollows);
                   _cand.support = tree.getTotalOccurrences(occ, OPTIONS_WEIGHTED_OCCURRENCE);
                 }
                 
@@ -503,7 +505,7 @@ public class MineLSC {
     
     tree.clearCoverageMarking();
     for (SScenario s : originalScenarios.values()) {
-      tree.confidence(s, true);
+      tree.confidence(s, true, config.forceDirectlyFollows);
     }
     return tree.toDot(getShortenedNames());
   }
@@ -511,7 +513,7 @@ public class MineLSC {
   public String getCoverageTreeFor(SScenario s) {
     
     tree.clearCoverageMarking();
-    double c = tree.confidence(s, true);
+    double c = tree.confidence(s, true, config.forceDirectlyFollows);
     System.out.println(s+" has confidence "+c);
     return tree.toDot(getShortenedNames());
   }
@@ -520,7 +522,11 @@ public class MineLSC {
     return tree;
   }
   
-  public ArrayList<LSC> getLSCs() {
+  public Configuration getConfig() {
+	return config;
+}
+
+public ArrayList<LSC> getLSCs() {
     return lscs;
   }
   
@@ -596,7 +602,7 @@ public class MineLSC {
       
       //if (e < 11 || (e >= 16 && e <=26)) continue; 
       
-      SimpleArrayList<SLogTreeNode[]> occ = tree.countOccurrences(new short[] { (short)e }, null, null);
+      SimpleArrayList<SLogTreeNode[]> occ = tree.countOccurrences(new short[] { (short)e }, null, null, config.forceDirectlyFollows);
 
       int total_occurrences = tree.getTotalOccurrences(occ, OPTIONS_WEIGHTED_OCCURRENCE);
 
@@ -623,6 +629,18 @@ public class MineLSC {
         
         System.out.println("mining for "+e);
         short remainingEvents[] = removeFrom(allEvents, e);
+        
+        // XXX: remove all local events
+        boolean localEvents[] = new boolean[slog.originalNames.length];
+        for (int i=0; i<remainingEvents.length; i++) {
+        	short ev = remainingEvents[i];
+        	if (slog.event_id_to_lsc_events[ev][SLog.LSC_CALLER].equals(slog.event_id_to_lsc_events[ev][SLog.LSC_CALLEE])) {
+        		localEvents[ev] = true;
+        	} else {
+        		localEvents[ev] = false;
+        	}
+        }
+        //remainingEvents = removeFrom(remainingEvents, localEvents);
         
         if (config.optimizedSearch)
           mineSupportedWords_optimized(tree, minSupThreshold, new short[] { e }, remainingEvents, remainingEvents, supportedWordsTree, false);
@@ -721,7 +739,7 @@ public class MineLSC {
       // it does: skip this successor (each event occurs only once)
       if (count > 0) {
         //mineSupportedWords_subwords(tree, minSupThreshold, word, ev, words, e);
-        if (!config.allowEventRepetitions || count > 2) continue;
+        if (!config.allowEventRepetitions || count > config.maxRepetitionCount) continue;
         if (e == word[0]) continue; // never repeat first pre-chart event
       }
       
@@ -733,7 +751,7 @@ public class MineLSC {
       }
       
       boolean[] stuck_here = new boolean[slog.originalNames.length];
-      SimpleArrayList<SLogTreeNode[]> occ = tree.countOccurrences(nextWord, violators, stuck_here);
+      SimpleArrayList<SLogTreeNode[]> occ = tree.countOccurrences(nextWord, violators, stuck_here, config.forceDirectlyFollows);
       if (stuck_at == null) {
         stuck_at = stuck_here;
       } else {
@@ -934,8 +952,8 @@ public class MineLSC {
       
       
       SimpleArrayList<SLogTreeNode[]> occ = (config.skipEvents_invisible)
-          ? tree.countOccurrences(nextWord, null, null) 
-          : tree.countOccurrences(nextWord, visibleEvents, null, null);
+          ? tree.countOccurrences(nextWord, null, null, config.forceDirectlyFollows) 
+          : tree.countOccurrences(nextWord, visibleEvents, null, null, config.forceDirectlyFollows);
       
       int total_occurrences = tree.getTotalOccurrences(occ, OPTIONS_WEIGHTED_OCCURRENCE);
       

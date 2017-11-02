@@ -18,7 +18,7 @@ public class SEvent {
   public String returnValue;
   
   public static final String FIELD_RESULT = "result";
-  public static final String FIELD_METHOD = "concept:name";
+  public static final String FIELD_METHOD = XConceptExtension.KEY_NAME;
   public static final String FIELD_RECEIVERID = "receiverID";
   public static final String FIELD_RECEIVER = "receiver";
   public static final String FIELD_SENDERID = "senderID";
@@ -34,12 +34,18 @@ public class SEvent {
   }
   
   public SEvent(XEvent e) {
-    method = ((XAttributeLiteral)e.getAttributes().get(FIELD_METHOD)).getValue();
-    sender = ((XAttributeLiteral)e.getAttributes().get(FIELD_SENDER)).getValue();
-    senderID = ((XAttributeLiteral)e.getAttributes().get(FIELD_SENDERID)).getValue();
-    receiver = ((XAttributeLiteral)e.getAttributes().get(FIELD_RECEIVER)).getValue();
-    receiverID = ((XAttributeLiteral)e.getAttributes().get(FIELD_RECEIVERID)).getValue();
-    returnValue = ((XAttributeLiteral)e.getAttributes().get(FIELD_RESULT)).getValue();
+	// method name is name+life-cycle or just name, if no life-cycle is defined
+    method = (getValue(e, XLifecycleExtension.KEY_TRANSITION, null) != null) ? getValue(e, FIELD_METHOD, null)+"+"+getValue(e, XLifecycleExtension.KEY_TRANSITION, null) : getValue(e, FIELD_METHOD, null); 
+    sender = getValue(e, FIELD_SENDER, "default_object");
+    senderID = getValue(e, FIELD_SENDERID, "0");
+    receiver = getValue(e, FIELD_RECEIVER, "default_object");
+    receiverID = getValue(e, FIELD_RECEIVERID, "0");
+    returnValue = getValue(e, FIELD_RESULT, "0");
+  }
+  
+  private static String getValue(XEvent e, String key, String default_value) {
+	  if (e.getAttributes().containsKey(key)) return ((XAttributeLiteral)e.getAttributes().get(key)).getValue();
+	  else return default_value;
   }
   
   public XEvent toXEvent(XFactory factory) {

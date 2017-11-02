@@ -110,7 +110,7 @@ public class SLog {
   public final static int LSC_CALLER = 0;
   public final static int LSC_CALLEE = 1;
   public final static int LSC_METHOD = 2;
-  private String[][] event_id_to_lsc_events;
+  public String[][] event_id_to_lsc_events;
   
   public void computeLSCEventNames() {
     

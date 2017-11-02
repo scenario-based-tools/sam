@@ -92,7 +92,7 @@ public class RunExperimentCompare {
        * format returned is the long format which includes file information and
        * permissions.
        */
-      //System.out.println("calling "+command);
+      System.out.println("calling "+command);
       Process p = r.exec(command);
       InputStream in = p.getInputStream();
       BufferedInputStream buf = new BufferedInputStream(in);
@@ -189,6 +189,7 @@ public class RunExperimentCompare {
     
     Configuration config_branch = Configuration.mineBranching();
     config_branch.allowEventRepetitions = false;
+    //config_branch.forceDirectlyFollows = true; // XXX: FOR TESTING ONLY
     minerBranch = new MineLSC(config_branch);
     minerBranch.OPTIONS_WEIGHTED_OCCURRENCE = true;
     System.out.println("mining branching lscs from "+logFile);
@@ -206,6 +207,7 @@ public class RunExperimentCompare {
   public ArrayList<LSC> runMiner_Linear(final String logFile, final XLog xlog, final int minSupportThreshold, final double confidence) throws IOException {
     Configuration config_linear = Configuration.mineLinear();
     config_linear.allowEventRepetitions = false;
+    //config_linear.forceDirectlyFollows = true; // XXX: FOR TESTING ONLY
     minerLinear = new MineLSC(config_linear, minerBranch.getSupportedWords());
     minerLinear.OPTIONS_WEIGHTED_OCCURRENCE = true;
     System.out.println("mining linear lscs from "+logFile);
@@ -903,8 +905,8 @@ public class RunExperimentCompare {
           
           // compute support of the scenario
           r.append("support: "+l.getSupport()+"<br/>\n");
-          if (mb) r.append("confidence (branch) "+minerBranch.getTree().confidence(originalScenarios.get(l), true)+"<br/>\n");
-          if (ml) r.append("confidence (linear) "+minerLinear.getTree().confidence(originalScenarios.get(l), true)+"<br/>\n");
+          if (mb) r.append("confidence (branch) "+minerBranch.getTree().confidence(originalScenarios.get(l), true, minerBranch.getConfig().forceDirectlyFollows)+"<br/>\n");
+          if (ml) r.append("confidence (linear) "+minerLinear.getTree().confidence(originalScenarios.get(l), true, minerLinear.getConfig().forceDirectlyFollows)+"<br/>\n");
           
           // get all occurrences of current scenario from the tree of the branching miner
           MineBranchingTree tree = minerBranch.getTree();

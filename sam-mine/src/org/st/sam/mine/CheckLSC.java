@@ -104,8 +104,8 @@ public class CheckLSC {
       word[e+s.pre.length] = s.main[e];
     }
     
-    SimpleArrayList<SLogTreeNode[]> occ = tree.countOccurrences(word, null, null);
-    double conf = tree.confidence(s, true);
+    SimpleArrayList<SLogTreeNode[]> occ = tree.countOccurrences(word, null, null, false);
+    double conf = tree.confidence(s, true, false);
     int total_occurrences = getTotalOccurrences(occ);
 
     
